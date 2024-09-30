@@ -46,7 +46,10 @@ class Request
                 $code = 200;
                 if (empty($entities)) {
                     $code = 404;
+                    Response::response([], $code);
+                    return;
                 }
+                Response::response($entities, $code);
                 break;
             case 'cities':
                 $repo = new CityRepository();
