@@ -7,8 +7,10 @@ let modButtons = []
 let nameBars = []
 let zipBars = []
 
+const urlBase = "http://localhost:8000"
+
 document.addEventListener("DOMContentLoaded", () =>{
-    DynamicallyPopulateTheCountySelect()
+    DynamicallyPopulateTheCountySelect(countySelect)
 })
 
 function FindBar(id, name){
@@ -49,7 +51,7 @@ function HideOthers(id, name){
 async function ListenForDelete(type){
     delButtons.forEach((item) =>{
         item.addEventListener("click", () =>{
-            let url = "http://localhost:8000/"+type+"/"+item.value
+            let url = urlBase + "/"+type+"/"+item.value
             fetch(url, {
                 method: "DELETE",
                 headers: {
@@ -80,14 +82,34 @@ async function ListenForDelete(type){
 }
 
 async function ListenForMod(type) {
-    console.log(modButtons)
     modButtons.forEach((item) =>{
         item.addEventListener("click", () =>{
-            console.log(item)
             if(type == "counties"){
                 let bar = FindBar("mod_name_"+item.value, "name")
                 bar.classList.remove("hidden")
                 HideOthers("mod_name_"+item.value, "name")
+                if(bar.value != ""){
+                    let modData = {
+                        "name": bar.value
+                    }
+                    let url = urlBase + "/counties/"+item.value
+                    fetch(url, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(modData)
+                    })
+                    .then(response => {
+                        if(!response.ok){
+                            throw new Error('Network response was not ok')
+                        }
+                        return response.json()
+                    })
+                    .then(data =>{
+                        console.log(data)
+                    })
+                }
             }
             else if(type == "cities"){
                 let nameBar = FindBar("mod_name_"+item.value, "name")
@@ -96,13 +118,57 @@ async function ListenForMod(type) {
                 zipBar.classList.remove("hidden")
                 HideOthers("mod_zip_"+item.value, "zip")
                 HideOthers("mod_name_"+item.value, "name")
+                if(nameBar.value != ""){
+                    let modData = {
+                        "city": nameBar.value
+                    }
+                    let url = urlBase + "/cities/"+item.value
+                    fetch(url, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(modData)
+                    })
+                    .then(response => {
+                        if(!response.ok){
+                            throw new Error('Network response was not ok')
+                        }
+                        return response.json()
+                    })
+                    .then(data =>{
+                        console.log(data)
+                    })
+                }
+                if(zipBar.value != ""){
+                    let modData = {
+                        "zip_code": zipBar.value
+                    }
+                    let url = urlBase + "/cities/"+item.value
+                    fetch(url, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(modData)
+                    })
+                    .then(response => {
+                        if(!response.ok){
+                            throw new Error('Network response was not ok')
+                        }
+                        return response.json()
+                    })
+                    .then(data =>{
+                        console.log(data)
+                    })
+                }
             }
         })
     })
 }
 
-async function DynamicallyPopulateTheCountySelect(){
-    let url = "http://localhost:8000/counties";
+async function DynamicallyPopulateTheCountySelect(theSelect){
+    let url = urlBase + "/counties";
     
     fetch(url, {
         method: "GET",
@@ -122,7 +188,7 @@ async function DynamicallyPopulateTheCountySelect(){
             let opt = document.createElement("option")
             opt.value = data.data[i].id
             opt.innerText = data.data[i].name
-            countySelect.appendChild(opt)
+            theSelect.appendChild(opt)
         }
         return data
     })
@@ -134,6 +200,14 @@ async function DynamicallyPopulateTheCountySelect(){
 function GenLayout(data, type){
     
     outputTable.innerText = ''
+    let th1 = document.createElement('th')
+    th1.innerText = "#"
+    let th2 = document.createElement('th')
+    th2.innerText = "Megnevezés"
+    let row = document.createElement('tr')
+    row.appendChild(th1)
+    row.appendChild(th2)
+    outputTable.appendChild(row)
 
     for(let i = 0; i < data.data.length;i++){
         let del = document.createElement("button")
@@ -208,7 +282,7 @@ function GenLayout(data, type){
 
 okButton.addEventListener("click", async () =>{
     let countyId = countySelect.options[countySelect.selectedIndex].value;
-    let url = "http://localhost:8000/counties/"+countyId+"/cities";
+    let url = urlBase + "/counties/"+countyId+"/cities";
     
     fetch(url, {
         method: "GET",
@@ -234,7 +308,7 @@ okButton.addEventListener("click", async () =>{
 })
 
 county.addEventListener("click", async () =>{
-    let url = "http://localhost:8000/counties";
+    let url = urlBase + "/counties";
     
     fetch(url, {
         method: "GET",
